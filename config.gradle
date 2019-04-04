@@ -2,7 +2,7 @@ ext {
     android = [
             compileSdkVersion  : 27,
             //buildToolsVersion:'26.0.2',
-            applicationId      : 'com.chia.framework',
+            applicationId      : 'com.chia.app',
             minSdkVersion      : 17,
             targetSdkVersion   : 27,
             versionCode        : 20032,
