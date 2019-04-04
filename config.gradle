@@ -167,13 +167,8 @@ ext {
             DropDownMenu               : 'com.github.EthanCo:DropDownMenu:1.0.8',
             brvahbinding               : 'com.github.EthanCo:BrvahBinding:1.3.0',
 
-            //mina
-            //mina                       : 'org.apache.mina:mina-core:2.0.19',
-            //codec                      : 'commons-codec:commons-codec:1.11',
             //ultrapager
             ultra_pager                : 'com.alibaba.android:ultraviewpager:1.0.6.1@aar',
-
-            //lib_easylink               : "io.fogcloud.sdk:easylinkv3:0.2.7",
 
             //-----------------player-----------------------------
             danmaku_java               : 'tv.danmaku.ijk.media:ijkplayer-java:0.8.8',
