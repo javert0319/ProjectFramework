@@ -8,4 +8,40 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+
+    <style name="AppThemeDefault" parent="AppThemeBase" />
+
+    <!-- Base application theme. -->
+    <style name="AppThemeBase" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColorLink">#0b9a27</item>
+        <item name="android:textColorPrimary">@color/colorPrimaryText</item>
+        <item name="android:windowBackground">@color/colorWhiteSmoke</item>
+        <item name="actionMenuTextColor">@color/colorWhite</item>
+        <item name="editTextColor">@color/colorSecondaryText</item>
+        <!--<item name="actionBarSize">@dimen/actionbar_height</item>-->
+        <item name="android:dialogTheme">@style/TextSizeDialog</item>
+        <item name="android:textAppearanceLargePopupMenu">@style/myPopupMenuTextAppearanceLarge</item>
+    </style>
+
+    <style name="LoginTextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">32dp</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="LoginEditText">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginEnd">32dp</item>
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:ems">10</item>
+        <item name="android:inputType">textPersonName</item>
+    </style>
+
 </resources>

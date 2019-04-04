@@ -75,11 +75,11 @@ android {
         }
     }
 
-    /*repositories {
+    repositories {
         flatDir {
             dirs project(':lib.frame').file('libs')
         }
-    }*/
+    }
 
 }
 
@@ -121,11 +121,11 @@ dependencies {
 
     /*if (!rootProject.ext.is_build_module) {
         implementation project(':app.movie')
-    }
+    }*/
 
     implementation project(':lib.frame')
     implementation project(':lib.network')
     //implementation project(':lib.bean')
     implementation project(':lib.mvvm')
-    implementation project(':lib.style')*/
+    implementation project(':lib.style')
 }
