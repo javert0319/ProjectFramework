@@ -1,0 +1,439 @@
+Index: app.broadlink/src/main/java/com/app/broadlink/usage/view/BLAirConditonerActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app.broadlink/src/main/java/com/app/broadlink/usage/view/BLAirConditonerActivity.kt	(revision 53323a379e0809e2a29a964364f0115b48ed995e)
++++ app.broadlink/src/main/java/com/app/broadlink/usage/view/BLAirConditonerActivity.kt	(date 1533175969013)
+@@ -16,9 +16,8 @@
+ import com.jakewharton.rxbinding2.view.RxView
+ import com.lib.frame.view.BaseActivity
+ import com.lib.frame.view.BaseView
+-import com.lib.kotlinex.extension.dpToPx
+-import com.lib.utils.io.SPUtil
+ import com.lib.kotlinex.extension.toast
++import com.lib.utils.io.SPUtil
+ import com.lib.utils.login.LoginService
+ import com.nbhope.hopelauncher.lib.network.NetFacade
+ import com.nbhope.hopelauncher.lib.network.ParamsCreator
+@@ -72,8 +71,8 @@
+ 
+     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+         val id = item?.itemId
+-        when(id){
+-            R.id.menu_study -> toast("学习")
++        when (id) {
++            R.id.menu_study -> goCustomKeyActivity()
+             R.id.menu_clocking -> toast("定时")
+             R.id.menu_edit -> toast("编辑")
+             R.id.menu_property -> toast("属性")
+@@ -81,6 +80,14 @@
+         return super.onOptionsItemSelected(item)
+     }
+ 
++    private fun goCustomKeyActivity() {
++        if (refrenceId == null || deviceId == null) return
++        ARouter.getInstance().build("/broadlink/custom_panel")
++                .withLong("refrenceId", refrenceId!!)
++                .withLong("deviceId", deviceId!!)
++                .navigation(TvPanelActivity@ this)
++    }
++
+     override fun onBackPressed() {
+         if (mPopupWindow != null) {
+             if (mPopupWindow!!.isShowing)
+Index: app.broadlink/src/main/java/com/app/broadlink/usage/view/BLCustomActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app.broadlink/src/main/java/com/app/broadlink/usage/view/BLCustomActivity.kt	(revision 53323a379e0809e2a29a964364f0115b48ed995e)
++++ app.broadlink/src/main/java/com/app/broadlink/usage/view/BLCustomActivity.kt	(date 1533175587177)
+@@ -2,7 +2,9 @@
+ 
+ import android.databinding.DataBindingUtil
+ import android.os.Bundle
++import com.alibaba.android.arouter.facade.annotation.Autowired
+ import com.alibaba.android.arouter.facade.annotation.Route
++import com.alibaba.android.arouter.launcher.ARouter
+ import com.app.broadlink.R
+ import com.app.broadlink.databinding.BroadlinkActivityCustomBinding
+ import com.app.broadlink.usage.view.itemdecoration.BLCutomDecoration
+@@ -11,11 +13,20 @@
+ import com.lib.kotlinex.extension.dpToPx
+ 
+ @Route(path = "/broadlink/custom_panel")
+-class BLCustomActivity : BaseActivity<BaseView, BlCustomViewModel>() {
++class BLCustomActivity : BaseActivity<BaseView, BlCustomKeyViewModel>() {
++
++    @Autowired
++    @JvmField
++    var deviceId: Long? = 0
++
++    @Autowired
++    @JvmField
++    var refrenceId: Long? = 0
+ 
+     private lateinit var mBinding: BroadlinkActivityCustomBinding
+-    override fun createViewModel(): BlCustomViewModel {
+-        return BlCustomViewModel(this)
++    override fun createViewModel(): BlCustomKeyViewModel {
++        ARouter.getInstance().inject(this)
++        return BlCustomKeyViewModel(this, refrenceId ?: 0, deviceId ?: 0)
+     }
+ 
+     override fun initVarAndView(savedInstanceState: Bundle?) {
+Index: app.broadlink/src/main/java/com/app/broadlink/usage/view/BlCustomKeyViewModel.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app.broadlink/src/main/java/com/app/broadlink/usage/view/BlCustomKeyViewModel.kt	(date 1533175489487)
++++ app.broadlink/src/main/java/com/app/broadlink/usage/view/BlCustomKeyViewModel.kt	(date 1533175489487)
+@@ -0,0 +1,119 @@
++package com.app.broadlink.usage.view
++
++import android.app.Activity
++import android.support.v4.widget.SwipeRefreshLayout
++import android.util.Log
++import com.app.broadlink.BR
++import com.app.broadlink.R
++import com.app.broadlink.usage.view.bean.BLCustomItemBean
++import com.google.gson.Gson
++import com.google.gson.JsonObject
++import com.lib.frame.view.BaseView
++import com.lib.frame.view.encapsulation.brvah.binding.BrvahItemBinding
++import com.lib.frame.view.encapsulation.brvah.binding.action.BrvahAction1
++import com.lib.frame.viewmodel.LoadMoreBindingViewModel
++import com.lib.kotlinex.extension.getString
++import com.lib.kotlinex.extension.toast
++import com.lib.utils.login.LoginService
++import com.nbhope.hopelauncher.lib.network.NetFacade
++import com.nbhope.hopelauncher.lib.network.ParamsCreator
++import com.nbhope.hopelauncher.lib.network.bean.entry.broadlink.BLDeviceCustomKey
++import io.reactivex.Flowable
++import io.reactivex.android.schedulers.AndroidSchedulers
++import io.reactivex.schedulers.Schedulers
++import me.leefeng.promptlibrary.PromptButton
++import me.leefeng.promptlibrary.PromptButtonListener
++import me.leefeng.promptlibrary.PromptDialog
++import java.util.concurrent.TimeUnit
++
++
++class BlCustomKeyViewModel(ctx: Activity, val refrenceId: Long, val deviceId: Long) : LoadMoreBindingViewModel<BaseView, BLCustomItemBean>() {
++    val mContext: Activity = ctx
++    var cataType: Int = 1
++
++    override fun getItemBinding(): BrvahItemBinding<BLCustomItemBean> {
++        return BrvahItemBinding.of<BLCustomItemBean>(BR.bean, R.layout.broadlink_custom_key_item)
++                .clearExtras()
++                .bindExtra(BR.addAction, BrvahAction1<BLCustomItemBean> { bean ->
++                    toast("addAction:" + Gson().toJson(bean))
++                })
++                .bindExtra(BR.learnAction, BrvahAction1<BLCustomItemBean> { bean ->
++                    toast("learn:" + Gson().toJson(bean))
++                })
++    }
++
++    val add: AddCustom = object : AddCustom {
++        override fun addButton() {
++            val promptDialog = PromptDialog(mContext)
++            val cancel = PromptButton("取消", PromptButtonListener { _ -> promptDialog.dismiss() })
++            cancel.textColor = mContext.resources.getColor(R.color.broadlink_default_radio_font_color)
++            promptDialog.showAlertSheet(getString(R.string.broadlink_custom_learn_tips), false, cancel)
++        }
++    }
++
++    fun getAirIcons(): Flowable<List<BLCustomItemBean>> {
++        val js = JsonObject()
++        js.addProperty("deviceId", deviceId)
++        js.addProperty("eleId", refrenceId)
++        js.addProperty("tokenId", LoginService.getInstance().getTokenBase64())
++        val map = ParamsCreator.generateRequestBodyParams(js)
++        val result = ArrayList<BLCustomItemBean>()
++
++        return NetFacade.getInstance()
++                .provideDefaultService()
++                .deviceCustomKeyList(map)
++                .map {
++
++                    it.list?.mapTo(result) {
++                        BLCustomItemBean(it)
++                    }
++                    val bean = BLCustomItemBean(BLDeviceCustomKey())
++                    bean.isAdd.set(true)
++                    result.add(bean)
++                    for (blCustomItemBean in result) {
++                        Log.i("Z---", "getAirIcons:" + blCustomItemBean.toString())
++                    }
++                    result
++                }
++    }
++
++
++    fun loadType(type: Int) {
++        cataType = type
++    }
++
++    override fun load(mPage: Int) {
++        /*getAirIcons().subscribeOn(Schedulers.io())
++                .observeOn(AndroidSchedulers.mainThread())
++                .subscribe(
++                        { list ->
++                            addItems(list)
++                            if (isSwipeRefreshing.get()) {
++                                isSwipeRefreshing.set(false)
++                            }
++                        },
++                        { err ->
++                            err.printStackTrace()
++                            if (isSwipeRefreshing.get()) {
++                                isSwipeRefreshing.set(false)
++                            }
++                        })*/
++        load(getAirIcons())
++    }
++
++    override fun getOnSwipeRefreshListener(): SwipeRefreshLayout.OnRefreshListener {
++        Flowable.timer(10, TimeUnit.SECONDS)
++                .subscribeOn(Schedulers.io())
++                .observeOn(AndroidSchedulers.mainThread())
++                .subscribe {
++                    if (isSwipeRefreshing.get()) {
++                        isSwipeRefreshing.set(false)
++                    }
++                }
++        return super.getOnSwipeRefreshListener()
++    }
++
++    interface AddCustom {
++        fun addButton()
++    }
++}
+\ No newline at end of file
+Index: app.broadlink/src/main/java/com/app/broadlink/usage/view/BlCustomViewModel.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app.broadlink/src/main/java/com/app/broadlink/usage/view/BlCustomViewModel.kt	(revision 53323a379e0809e2a29a964364f0115b48ed995e)
++++ app.broadlink/src/main/java/com/app/broadlink/usage/view/BlCustomViewModel.kt	(date 1533175691919)
+@@ -2,22 +2,16 @@
+ 
+ import android.app.Activity
+ import android.support.v4.widget.SwipeRefreshLayout
+-import android.util.Log
+ import com.app.broadlink.BR
+ import com.app.broadlink.R
+-import com.app.broadlink.usage.view.bean.BLCustomItemBean
+-import com.google.gson.Gson
+ import com.google.gson.JsonObject
+ import com.lib.frame.view.BaseView
+ import com.lib.frame.view.encapsulation.brvah.binding.BrvahItemBinding
+-import com.lib.frame.view.encapsulation.brvah.binding.action.BrvahAction1
+ import com.lib.frame.viewmodel.LoadMoreBindingViewModel
+ import com.lib.kotlinex.extension.getString
+-import com.lib.kotlinex.extension.toast
+ import com.lib.utils.login.LoginService
+ import com.nbhope.hopelauncher.lib.network.NetFacade
+ import com.nbhope.hopelauncher.lib.network.ParamsCreator
+-import com.nbhope.hopelauncher.lib.network.bean.entry.broadlink.BLDeviceCustomKey
+ import io.reactivex.Flowable
+ import io.reactivex.android.schedulers.AndroidSchedulers
+ import io.reactivex.schedulers.Schedulers
+@@ -27,19 +21,14 @@
+ import java.util.concurrent.TimeUnit
+ 
+ 
+-class BlCustomViewModel(ctx: Activity) : LoadMoreBindingViewModel<BaseView, BLCustomItemBean>() {
++class BlCustomViewModel(ctx: Activity) : LoadMoreBindingViewModel<BaseView, BLCustomItemViewModel>() {
+ 
+     val mContext: Activity = ctx
+     var cataType: Int = 1
+-    override fun getItemBinding(): BrvahItemBinding<BLCustomItemBean> {
+-        return BrvahItemBinding.of<BLCustomItemBean>(BR.bean, R.layout.broadlink_custom_key_item)
++    override fun getItemBinding(): BrvahItemBinding<BLCustomItemViewModel> {
++        return BrvahItemBinding.of<BLCustomItemViewModel>(BR.customItemModel, R.layout.broadlink_custom_item)
+                 .clearExtras()
+-                .bindExtra(BR.addAction, BrvahAction1<BLCustomItemBean> { bean ->
+-                    toast("addAction:"+Gson().toJson(bean))
+-                })
+-                .bindExtra(BR.learnAction,BrvahAction1<BLCustomItemBean> { bean ->
+-                    toast("learn:"+Gson().toJson(bean))
+-                })
++                .bindExtra(BR.addListen, add)
+     }
+ 
+     val add: AddCustom = object : AddCustom {
+@@ -51,27 +40,19 @@
+         }
+     }
+ 
+-    fun getAirIcons(): Flowable<List<BLCustomItemBean>> {
++    fun getAirIcons(): Flowable<List<BLCustomItemViewModel>> {
+         val js = JsonObject()
+-        js.addProperty("deviceId", "842878844279996416") //TODO
+-        js.addProperty("eleId", "848008588738727936")
+-        js.addProperty("tokenId", LoginService.getInstance().getTokenBase64())
++        js.addProperty("cataId", cataType)
++        js.addProperty("tokenId", LoginService.getInstance().tokenBase64)
+         val map = ParamsCreator.generateRequestBodyParams(js)
+-        val result = ArrayList<BLCustomItemBean>()
++        val result = ArrayList<BLCustomItemViewModel>()
+ 
+         return NetFacade.getInstance()
+                 .provideDefaultService()
+-                .deviceCustomKeyList(map)
++                .deviceSubIcons(map)
+                 .map {
+-
+-                    it.list?.mapTo(result) {
+-                        BLCustomItemBean(it)
+-                    }
+-                    val bean = BLCustomItemBean(BLDeviceCustomKey())
+-                    bean.isAdd.set(true)
+-                    result.add(bean)
+-                    for (blCustomItemBean in result) {
+-                        Log.i("Z---", "getAirIcons:" + blCustomItemBean.toString())
++                    it.list.mapTo(result) {
++                        BLCustomItemViewModel(it)
+                     }
+                     result
+                 }
+@@ -83,7 +64,7 @@
+     }
+ 
+     override fun load(mPage: Int) {
+-        /*getAirIcons().subscribeOn(Schedulers.io())
++        getAirIcons().subscribeOn(Schedulers.io())
+                 .observeOn(AndroidSchedulers.mainThread())
+                 .subscribe(
+                         { list ->
+@@ -97,8 +78,7 @@
+                             if (isSwipeRefreshing.get()) {
+                                 isSwipeRefreshing.set(false)
+                             }
+-                        })*/
+-        load(getAirIcons())
++                        })
+     }
+ 
+     override fun getOnSwipeRefreshListener(): SwipeRefreshLayout.OnRefreshListener {
+Index: app.broadlink/src/main/java/com/app/broadlink/usage/view/BLSTBActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app.broadlink/src/main/java/com/app/broadlink/usage/view/BLSTBActivity.kt	(revision 53323a379e0809e2a29a964364f0115b48ed995e)
++++ app.broadlink/src/main/java/com/app/broadlink/usage/view/BLSTBActivity.kt	(date 1533175994261)
+@@ -66,8 +66,8 @@
+ 
+     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+         val id = item?.itemId
+-        when(id){
+-            R.id.menu_study -> toast("学习")
++        when (id) {
++            R.id.menu_study -> goCustomKeyActivity()
+             R.id.menu_clocking -> toast("定时")
+             R.id.menu_edit -> toast("编辑")
+             R.id.menu_property -> toast("属性")
+@@ -75,6 +75,14 @@
+         return super.onOptionsItemSelected(item)
+     }
+ 
++    private fun goCustomKeyActivity() {
++        if (refrenceId == null || deviceId == null) return
++        ARouter.getInstance().build("/broadlink/custom_panel")
++                .withLong("refrenceId", refrenceId!!)
++                .withLong("deviceId", deviceId!!)
++                .navigation(TvPanelActivity@ this)
++    }
++
+     fun showNumDialog(view: View) {
+         mDialogNum = Dialog(this, R.style.TVDialog)
+         val dialogView = layoutInflater.inflate(R.layout.broadlink_expand_ctrl_layout, null)
+Index: app.broadlink/src/main/java/com/app/broadlink/usage/view/TvPanelActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app.broadlink/src/main/java/com/app/broadlink/usage/view/TvPanelActivity.kt	(revision 53323a379e0809e2a29a964364f0115b48ed995e)
++++ app.broadlink/src/main/java/com/app/broadlink/usage/view/TvPanelActivity.kt	(date 1533175912349)
+@@ -85,7 +85,7 @@
+     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+         val id = item?.itemId
+         when (id) {
+-            R.id.menu_study -> ARouter.getInstance().build("/broadlink/custom_panel").navigation(TvPanelActivity@ this)
++            R.id.menu_study -> goCustomKeyActivity()
+             R.id.menu_clocking -> toast("定时")
+             R.id.menu_edit -> toast("编辑")
+             R.id.menu_property -> toast("属性")
+@@ -93,6 +93,13 @@
+         return super.onOptionsItemSelected(item)
+     }
+ 
++    private fun goCustomKeyActivity() {
++        ARouter.getInstance().build("/broadlink/custom_panel")
++                .withLong("refrenceId", refrenceId)
++                .withLong("deviceId", deviceId)
++                .navigation(TvPanelActivity@ this)
++    }
++
+     override fun createViewModel(): BLTVLViewModel {
+         return BLTVLViewModel()
+     }
+Index: app.broadlink/src/main/res/layout/broadlink_activity_custom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app.broadlink/src/main/res/layout/broadlink_activity_custom.xml	(revision 53323a379e0809e2a29a964364f0115b48ed995e)
++++ app.broadlink/src/main/res/layout/broadlink_activity_custom.xml	(date 1533175529217)
+@@ -5,7 +5,7 @@
+ 
+         <variable
+             name="customViewModel"
+-            type="com.app.broadlink.usage.view.BlCustomViewModel" />
++            type="com.app.broadlink.usage.view.BlCustomKeyViewModel" />
+ 
+         <import type="com.lib.frame.view.encapsulation.brvah.binding.BrvahLayoutManagers" />
+ 
+Index: app.broadlink/src/main/res/layout/broadlink_custom_item.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app.broadlink/src/main/res/layout/broadlink_custom_item.xml	(date 1533022533290)
++++ app.broadlink/src/main/res/layout/broadlink_custom_item.xml	(date 1533022533290)
+@@ -0,0 +1,30 @@
++<?xml version="1.0" encoding="utf-8"?>
++
++<layout xmlns:app="http://schemas.android.com/apk/res-auto">
++
++    <data>
++
++        <variable
++            name="customItemModel"
++            type="com.app.broadlink.usage.view.BLCustomItemViewModel" />
++
++        <variable
++            name="addListen"
++            type="com.app.broadlink.usage.view.BlCustomViewModel.AddCustom" />
++    </data>
++
++    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content">
++
++        <android.support.v7.widget.AppCompatImageButton
++            android:layout_width="51dp"
++            android:layout_height="51dp"
++            android:layout_gravity="center"
++            android:background="@null"
++            android:onClick="@{()->addListen.addButton()}"
++            app:glideUri="@{customItemModel.iconUrl}"
++            app:srcCompat="@drawable/broadlink_btn_add" />
++
++    </FrameLayout>
++</layout>
+\ No newline at end of file

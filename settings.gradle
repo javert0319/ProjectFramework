@@ -1,1 +1,1 @@
-include ':app',':lib.style', ':lib.mvvm',':lib.frame',':lib.network', ':lib.global'
+include ':app',':lib.style', ':lib.mvvm',':lib.frame',':lib.network', ':lib.global', ':app.movie',':lib.videoplayer'

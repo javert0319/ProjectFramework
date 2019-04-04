@@ -13,10 +13,10 @@ class MainActivity : BaseSimpleActivity() {
         setContentView(R.layout.activity_main)
         initToolbar("豆瓣视频",true)
         btn_movie.setOnClickListener {
-            Toast.makeText(this,"正在热映",Toast.LENGTH_SHORT).show()
-            /*ARouter.getInstance().build("/movie/is_hit")
+            //Toast.makeText(this,"正在热映",Toast.LENGTH_SHORT).show()
+            ARouter.getInstance().build("/movie/is_hit")
                 .withString("title", "正在热映")
-                .navigation()*/
+                .navigation()
         }
     }
 }

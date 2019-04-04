@@ -1,0 +1,57 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion rootProject.ext.android.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.android.minSdkVersion
+        targetSdkVersion rootProject.ext.android.targetSdkVersion
+        versionCode rootProject.ext.android.versionCode
+        versionName rootProject.ext.android.versionName
+    }
+    sourceSets {
+        main() {
+            manifest.srcFile 'src/main/AndroidManifest.xml'
+            java.srcDirs = ['src/main/java']
+            resources.srcDirs = ['src/main/resources']
+            res.srcDirs = ['src/main/res']
+            assets.srcDirs = ['src/main/assets']
+            jniLibs.srcDirs = ['libs']
+            jni.srcDirs = ['src/main/jni']
+
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+
+        }
+    }
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    api fileTree(dir: 'libs', include: ['*.jar'])
+
+    // # required, enough for most devices.
+    api rootProject.ext.dependencies.danmaku_java
+    api rootProject.ext.dependencies.danmaku_armv7a
+
+    //# Other ABIs: optional
+    //compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.8.8'
+    //compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.8.8'
+    //compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.8.8'
+    //compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.8.8'
+
+    //# ExoPlayer as IMediaPlayer: optional, experimental
+    api rootProject.ext.dependencies.danmaku_exo
+
+    //cache
+    api rootProject.ext.dependencies.danikula_videocache
+}
+//apply from: '../gradle/maven_push.gradle'
