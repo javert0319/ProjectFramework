@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="movie_colorTheme">#ffce3d3a</color>
+    <!--页面背景的颜色-->
+    <color name="movie_color_page_bg">#F1F3F4</color>
+    <color name="movie_colorWhite">#ffffffff</color>
+    <color name="movie_colorWhiteHalf">#bbffffff</color>
+
+    <!--主页tab背景-->
+    <color name="movie_colorTabBg">#ffffffff</color>
+    <color name="movie_colorTabTextCheck">#ffce3d3a</color>
+    <color name="movie_colorTabTextNormal">#585858</color>
+    <color name="movie_colorTabLine">#ffce3d3a</color>
+
+    <!--侧边栏分割线-->
+    <color name="movie_colorNavLine">#E0E0E0</color>
+    <!--导航数据侧边栏背景色-->
+    <color name="movie_colorNaviBg">#f3f3f3</color>
+
+
+    <!--分割线-->
+    <color name="movie_colorLine">#EBEBEB</color>
+    <!--首页分割线-->
+    <color name="movie_colorHomeLine">#D4D4D4</color>
+
+    <color name="movie_colorLineDeep">#BBBBBB</color>
+
+    <!--item的分割线-->
+    <color name="movie_colorLineItem">#FFDDDDDD</color>
+
+    <!--tab标签栏文字的颜色-->
+    <color name="movie_colorTabText">#585858</color>
+    <!--正文文字颜色-->
+    <color name="movie_colorContent">#ff333333</color>
+    <!--水波纹或5.0以下选择器颜色-->
+    <color name="movie_tabBackground">#777D7D7D</color>
+    <!--item的水波纹颜色-->
+    <color name="movie_itemBackground">#DD7D7D7D</color>
+    <!--item的5.0一下版本选择器颜色-->
+    <color name="movie_itemLowBackground">#d9d9d9</color>
+
+    <!--透明色-->
+    <color name="movie_colorTransparent">#00000000</color>
+    <!--半透明-->
+    <color name="movie_colorBanTransparent">#11000000</color>
+    <!--首页item文字颜色-->
+    <color name="movie_colorSubtitle">#999</color>
+
+    <color name="movie_colorTitle">#666</color>
+    <!--谈红色  用于首页调整点击变色-->
+    <color name="movie_colorSmallRed">#faebeb</color>
+
+    <!--电影评分-->
+    <color name="movie_colorRateRed">#FB5B81</color>
+
+    <!--没有水波纹效果的颜色选择器-->
+    <color name="movie_colorItemBackground">#d9d9d9</color>
+
+    <!--选择分类按下颜色-->
+    <color name="movie_colorChoosePress">#DDD</color>
+
+    <!--暂时用于反馈文字-->
+    <color name="movie_text_common">#191919</color>
+
+    <color name="movie_text_deed_bg">#f6f6f6</color>
+    <!--dialog的查看详情键-->
+    <color name="movie_colorBtDialog">#38659C</color>
+</resources>

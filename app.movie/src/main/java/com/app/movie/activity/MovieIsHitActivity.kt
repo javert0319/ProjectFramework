@@ -1,16 +1,15 @@
-package com.app.movie
+package com.app.movie.activity
 
 import android.databinding.DataBindingUtil
 import android.os.Bundle
-import android.util.Log
 import com.alibaba.android.arouter.facade.annotation.Autowired
 import com.alibaba.android.arouter.facade.annotation.Route
 import com.alibaba.android.arouter.launcher.ARouter
+import com.app.movie.R
 import com.app.movie.databinding.MovieActivityIsHitBinding
 import com.app.movie.interfaces.IMovie
 import com.app.movie.viewmodel.MovieIsHitViewModel
 import com.lib.frame.view.BaseActivity
-import fm.qingting.qtsdk.QTSDK
 
 @Route(path = "/movie/is_hit")
 class MovieIsHitActivity : BaseActivity<IMovie,MovieIsHitViewModel>() {
@@ -27,7 +26,7 @@ class MovieIsHitActivity : BaseActivity<IMovie,MovieIsHitViewModel>() {
     }
 
     override fun initVarAndView(savedInstanceState: Bundle?) {
-        binding = DataBindingUtil.setContentView(this,R.layout.movie_activity_is_hit)
+        binding = DataBindingUtil.setContentView(this, R.layout.movie_activity_is_hit)
         initToolbar(title,true)
         binding.vm = mViewModel
 

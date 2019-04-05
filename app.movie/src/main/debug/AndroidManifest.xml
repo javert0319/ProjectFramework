@@ -30,8 +30,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" />
-        <activity android:name=".MovieIsHitActivity"/>
+        <activity android:name=".MainActivity"
+                  android:launchMode="singleTask"
+                  android:screenOrientation="portrait"
+                  android:theme="@style/movie_ScrollPage"/>
+        <activity android:name=".activity.MovieIsHitActivity"/>
     </application>
 
 </manifest>
