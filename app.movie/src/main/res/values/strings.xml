@@ -10,4 +10,8 @@
     <string name="movie_main_night_model">夜间模式</string>
     <string name="movie_main_exit_app">退出应用</string>
     <string name="movie_main_lv_10">Lv.10</string>
+    <string name="movie_action_share">分享</string>
+    <string name="movie_actionbar_search">搜索</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
